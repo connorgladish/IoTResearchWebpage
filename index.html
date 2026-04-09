@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Anomaly Detection — IoT Transportation Networks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --ink-muted: #555;
+    --ink-faint: #999;
+    --paper: #f8f5ef;
+    --paper-warm: #f2ede4;
+    --paper-dark: #1a1714;
+    --accent: #c8352b;
+    --accent-warm: #e8a020;
+    --rule: #d4cfc6;
+    --rule-dark: #333;
+    --mono-bg: #1e1c1a;
+    --success: #2d7a4f;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(248,245,239,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .nav-links {
+    display: flex; gap: 2rem; list-style: none;
+  }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--accent);
+    color: white;
+    padding: 3px 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 7rem 4rem 4rem;
+    position: relative;
+    background: var(--paper-dark);
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,53,43,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,53,43,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridShift 20s linear infinite;
+  }
+  @keyframes gridShift {
+    0% { background-position: 0 0; }
+    100% { background-position: 60px 60px; }
+  }
+  .hero-noise {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(200,53,43,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(232,160,32,0.08) 0%, transparent 50%);
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 6vw, 6rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: #f0ece4;
+    max-width: 18ch;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-subtitle {
+    margin-top: 2rem;
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: rgba(240,236,228,0.6);
+    max-width: 55ch;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+  .hero-meta {
+    margin-top: 3rem;
+    display: flex; align-items: center; gap: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+  .hero-meta-item {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .hero-meta-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.4);
+  }
+  .hero-meta-value {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(240,236,228,0.85);
+  }
+  .hero-divider {
+    width: 1px; height: 40px;
+    background: rgba(240,236,228,0.15);
+  }
+  .hero-scroll {
+    position: absolute; bottom: 2rem; right: 4rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.3);
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.2s;
+  }
+  .hero-scroll::before {
+    content: '';
+    display: block;
+    width: 1px; height: 40px;
+    background: rgba(240,236,228,0.2);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    background: var(--accent);
+    padding: 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    overflow: hidden;
+  }
+  .stat-item {
+    padding: 1rem 2rem;
+    position: relative;
+  }
+  .stat-item::after {
+    content: '';
+    position: absolute; right: 0; top: 20%; bottom: 20%;
+    width: 1px;
+    background: rgba(255,255,255,0.2);
+  }
+  .stat-item:last-child::after { display: none; }
+  .stat-number {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-top: 6px;
+  }
+
+  /* ── SECTION LAYOUT ── */
+  section { scroll-margin-top: 56px; }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 4rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .section-title em { font-style: italic; color: var(--accent); }
+
+  .section-body {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-top: 1.5rem;
+    line-height: 1.85;
+  }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+
+  /* ── MOTIVATION ── */
+  #motivation { background: var(--paper); }
+
+  .threat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    margin-top: 4rem;
+    border: 1px solid var(--rule);
+  }
+  .threat-card {
+    background: var(--paper);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .threat-card:hover { background: var(--paper-warm); }
+  .threat-icon {
+    width: 44px; height: 44px;
+    border: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+  }
+  .threat-title {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .threat-desc {
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .threat-tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(200,53,43,0.3);
+    padding: 3px 10px;
+  }
+
+  .pullquote {
+    border-left: 3px solid var(--accent);
+    padding: 1.5rem 2rem;
+    margin: 3rem 0;
+    background: rgba(200,53,43,0.04);
+  }
+  .pullquote p {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .pullquote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-style: normal;
+  }
+
+  /* ── DATASET ── */
+  #dataset { background: var(--paper-dark); }
+  #dataset .section-title { color: #f0ece4; }
+  #dataset .section-body { color: rgba(240,236,228,0.55); }
+
+  .dataset-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 4rem;
+    align-items: start;
+  }
+
+  .dataset-info h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.4);
+    margin-bottom: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .dataset-info h3:first-child { margin-top: 0; }
+
+  .dataset-fact {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(240,236,228,0.08);
+  }
+  .dataset-fact-label {
+    font-size: 0.9rem;
+    color: rgba(240,236,228,0.5);
+    font-weight: 300;
+  }
+  .dataset-fact-value {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: #f0ece4;
+  }
+
+  .class-chart-wrap { position: relative; }
+
+  .class-bar-list {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .class-bar-item { }
+  .class-bar-header {
+    display: flex; justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .class-bar-name {
+    font-size: 12px;
+    color: rgba(240,236,228,0.65);
+    font-weight: 300;
+  }
+  .class-bar-pct {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(240,236,228,0.4);
+  }
+  .class-bar-track {
+    height: 4px;
+    background: rgba(240,236,228,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .class-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    width: 0;
+  }
+  .class-bar-fill.benign { background: #2d7a4f; }
+  .class-bar-fill.rare { background: var(--accent-warm); }
+
+  /* ── PIPELINE ── */
+  #pipeline { background: var(--paper-warm); }
+
+  .pipeline-steps {
+    margin-top: 4rem;
+    position: relative;
+  }
+  .pipeline-steps::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .pipeline-step {
+    display: flex; gap: 2.5rem;
+    margin-bottom: 3rem;
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .pipeline-step.visible {
+    opacity: 1; transform: translateX(0);
+  }
+  .step-number-wrap {
+    flex-shrink: 0;
+    width: 56px; height: 56px;
+    border: 1px solid var(--rule);
+    background: var(--paper-warm);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .step-number {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink-faint);
+  }
+  .step-content { flex: 1; padding-top: 12px; }
+  .step-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .step-desc {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+  .step-code {
+    margin-top: 1rem;
+    background: var(--mono-bg);
+    padding: 1rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a8c4e0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .step-code .kw { color: #c792ea; }
+  .step-code .fn { color: #82aaff; }
+  .step-code .str { color: #c3e88d; }
+  .step-code .cm { color: #546e7a; font-style: italic; }
+  .step-code .num { color: #f78c6c; }
+  .step-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(200,53,43,0.1);
+    color: var(--accent);
+    padding: 2px 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── MODELS ── */
+  #models { background: var(--paper); }
+
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 3rem;
+  }
+  .model-card {
+    background: var(--paper);
+    padding: 2rem;
+    transition: background 0.25s;
+    cursor: default;
+  }
+  .model-card:hover { background: var(--paper-warm); }
+  .model-card.featured {
+    background: var(--ink);
+    color: #f0ece4;
+  }
+  .model-card.featured .model-type,
+  .model-card.featured .model-desc { color: rgba(240,236,228,0.5); }
+  .model-card.featured .model-metric-val { color: #f0ece4; }
+  .model-card.featured .model-metric-label { color: rgba(240,236,228,0.4); }
+  .model-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: white;
+    padding: 2px 8px;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  .model-name {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .model-type {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+  .model-desc {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+  }
+  .model-metrics {
+    display: flex; gap: 1.5rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.25rem;
+  }
+  .model-metric { flex: 1; }
+  .model-metric-val {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .model-metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── RESULTS ── */
+  #results { background: var(--paper-dark); }
+  #results .section-title { color: #f0ece4; }
+  #results .section-body { color: rgba(240,236,228,0.5); }
+
+  .results-tabs {
+    display: flex; gap: 0;
+    margin-top: 3rem;
+    border-bottom: 1px solid rgba(240,236,228,0.1);
+  }
+  .result-tab {
+    padding: 0.75rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.35);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .result-tab:hover { color: rgba(240,236,228,0.7); }
+  .result-tab.active {
+    color: #f0ece4;
+    border-bottom-color: var(--accent);
+  }
+
+  .result-panel { display: none; padding: 2.5rem 0; }
+  .result-panel.active { display: block; }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .results-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.35);
+    text-align: left;
+    padding: 0 1rem 1rem 0;
+    border-bottom: 1px solid rgba(240,236,228,0.08);
+    font-weight: 400;
+  }
+  .results-table td {
+    padding: 1rem 1rem 1rem 0;
+    border-bottom: 1px solid rgba(240,236,228,0.05);
+    color: rgba(240,236,228,0.75);
+    font-weight: 300;
+  }
+  .results-table tr:hover td { color: #f0ece4; background: rgba(240,236,228,0.03); }
+  .results-table .model-col {
+    font-weight: 500;
+    color: #f0ece4;
+    font-family: var(--serif);
+    font-size: 1rem;
+  }
+  .results-table .winner { color: var(--accent-warm); }
+  .results-table .winner-row td { background: rgba(232,160,32,0.04); }
+
+  .bar-inline {
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .bar-track-inline {
+    width: 80px; height: 3px;
+    background: rgba(240,236,228,0.08);
+    position: relative;
+  }
+  .bar-fill-inline {
+    height: 100%;
+    background: var(--accent-warm);
+    transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    width: 0;
+  }
+
+  /* ── FEATURES ── */
+  #features { background: var(--paper-warm); }
+
+  .features-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 5rem;
+    margin-top: 4rem;
+    align-items: start;
+  }
+
+  .feature-bars { display: flex; flex-direction: column; gap: 16px; }
+  .feature-item { }
+  .feature-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .feature-rank {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+  }
+  .feature-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  .feature-pct-label {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .feature-track {
+    height: 6px;
+    background: rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    width: 0;
+  }
+  .feature-cat {
+    display: inline-block;
+    margin-top: 5px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .feature-insights { }
+  .insight-card {
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .insight-number {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 900;
+    color: rgba(200,53,43,0.15);
+    position: absolute;
+    right: 1.5rem; top: 1rem;
+    line-height: 1;
+  }
+  .insight-title {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .insight-text {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  /* ── CNN ── */
+  #cnn { background: var(--paper); }
+
+  .cnn-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 5rem;
+    margin-top: 4rem;
+  }
+
+  .arch-diagram {
+    border: 1px solid var(--rule);
+    background: var(--mono-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-layer {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(240,236,228,0.06);
+  }
+  .arch-layer:last-child { border-bottom: none; }
+  .arch-layer-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #82aaff;
+    min-width: 140px;
+  }
+  .arch-layer-detail {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #546e7a;
+  }
+  .arch-layer-shape {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(240,236,228,0.2);
+    letter-spacing: 0.08em;
+  }
+  .arch-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.2);
+    padding: 0.5rem 0 0.25rem;
+    border-bottom: none !important;
+  }
+  .arch-connector {
+    width: 1px; height: 12px;
+    background: rgba(240,236,228,0.1);
+    margin: 0 auto;
+  }
+
+  .cnn-findings { }
+  .cnn-finding {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .cnn-finding:first-child { padding-top: 0; }
+  .cnn-finding-head {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .finding-dot {
+    width: 8px; height: 8px;
+    flex-shrink: 0;
+  }
+  .finding-dot.good { background: var(--success); }
+  .finding-dot.warn { background: var(--accent-warm); }
+  .finding-dot.bad { background: var(--accent); }
+  .cnn-finding-title {
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  .cnn-finding-text {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    padding-left: 1.5rem;
+  }
+
+  /* ── ERROR ANALYSIS ── */
+  #errors { background: var(--paper-dark); }
+  #errors .section-title { color: #f0ece4; }
+  #errors .section-body { color: rgba(240,236,228,0.5); }
+
+  .error-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: rgba(240,236,228,0.06);
+    border: 1px solid rgba(240,236,228,0.06);
+    margin-top: 3rem;
+  }
+  .error-card {
+    background: var(--paper-dark);
+    padding: 2rem;
+  }
+  .error-model {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f0ece4;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .error-model-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid;
+  }
+  .error-model-tag.ensemble { border-color: #82aaff; color: #82aaff; }
+  .error-model-tag.tree { border-color: #c3e88d; color: #c3e88d; }
+  .error-model-tag.boosting { border-color: var(--accent-warm); color: var(--accent-warm); }
+  .error-model-tag.instance { border-color: #c792ea; color: #c792ea; }
+  .error-model-tag.deep { border-color: rgba(240,236,228,0.3); color: rgba(240,236,228,0.5); }
+
+  .error-cause {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(240,236,228,0.05);
+  }
+  .error-cause:last-child { border-bottom: none; }
+  .error-cause-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.25);
+    margin-bottom: 3px;
+  }
+  .error-cause-text {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: rgba(240,236,228,0.6);
+    line-height: 1.6;
+  }
+
+  .udp-callout {
+    margin-top: 3rem;
+    background: rgba(200,53,43,0.08);
+    border: 1px solid rgba(200,53,43,0.2);
+    padding: 2rem 2.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  .udp-callout-icon {
+    font-family: var(--serif);
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: rgba(200,53,43,0.3);
+    line-height: 1;
+  }
+  .udp-callout-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f0ece4;
+    margin-bottom: 0.5rem;
+  }
+  .udp-callout-text {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: rgba(240,236,228,0.55);
+    line-height: 1.7;
+  }
+
+  /* ── FINDINGS ── */
+  #findings { background: var(--paper-warm); }
+
+  .findings-list { margin-top: 3.5rem; }
+  .finding-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    padding: 3rem 0;
+    border-top: 1px solid var(--rule);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .finding-item:last-child { border-bottom: 1px solid var(--rule); }
+  .finding-item.visible { opacity: 1; }
+  .finding-num {
+    font-family: var(--serif);
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: rgba(200,53,43,0.15);
+    line-height: 1;
+  }
+  .finding-content { }
+  .finding-title {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+  .finding-text {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--ink-muted);
+    line-height: 1.8;
+    max-width: 65ch;
+  }
+
+  /* ── FIGURES ── */
+  #figures { background: var(--paper); }
+
+  .figures-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+  .figure-card {
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .figure-card:hover { border-color: var(--accent); }
+  .figure-placeholder {
+    height: 180px;
+    background: linear-gradient(135deg, var(--paper-dark) 0%, #2a2420 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .figure-placeholder::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,53,43,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,53,43,0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .figure-placeholder-icon {
+    font-family: var(--mono);
+    font-size: 28px;
+    color: rgba(240,236,228,0.15);
+    position: relative;
+    z-index: 1;
+  }
+  .figure-placeholder-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.2);
+    position: relative;
+    z-index: 1;
+  }
+  .figure-caption {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+  .figure-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .figure-caption-text {
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+  .footer-section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.3);
+    margin-bottom: 1.25rem;
+  }
+  .footer-text {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: rgba(240,236,228,0.5);
+    line-height: 1.7;
+  }
+  .footer-link {
+    display: block;
+    font-size: 0.875rem;
+    color: rgba(240,236,228,0.5);
+    text-decoration: none;
+    font-weight: 300;
+    padding: 0.3rem 0;
+    transition: color 0.2s;
+  }
+  .footer-link:hover { color: var(--accent); }
+  .footer-bottom {
+    background: var(--ink);
+    border-top: 1px solid rgba(240,236,228,0.06);
+    padding: 1.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(240,236,228,0.2);
+    letter-spacing: 0.08em;
+  }
+  .footer-conf {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── IMAGE MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-content {
+    background: var(--paper-dark);
+    border: 1px solid rgba(240,236,228,0.1);
+    max-width: 700px; width: 90%;
+    padding: 2.5rem;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: transparent; border: none; cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(240,236,228,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: #f0ece4; }
+  .modal-placeholder-large {
+    height: 280px;
+    background: #111;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 1px dashed rgba(240,236,228,0.1);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-placeholder-large::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,53,43,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,53,43,0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .modal-placeholder-icon-lg {
+    font-size: 48px;
+    color: rgba(240,236,228,0.08);
+    position: relative; z-index: 1;
+    font-family: var(--mono);
+  }
+  .modal-placeholder-msg {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,236,228,0.2);
+    position: relative; z-index: 1;
+  }
+  .modal-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f0ece4;
+    margin-bottom: 0.5rem;
+  }
+  .modal-desc {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: rgba(240,236,228,0.5);
+    line-height: 1.7;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero { padding: 5rem 2rem 3rem; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 1rem 2rem; }
+    .section-inner { padding: 4rem 2rem; }
+    .dataset-layout, .features-layout, .cnn-layout { grid-template-columns: 1fr; gap: 2rem; }
+    .model-grid { grid-template-columns: 1fr; }
+    .threat-grid { grid-template-columns: 1fr; }
+    .error-grid { grid-template-columns: 1fr; }
+    .figures-grid { grid-template-columns: 1fr 1fr; }
+    footer { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 0.5rem; padding: 1rem 2rem; }
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .finding-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .finding-num { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <span class="nav-brand">Undergraduate Senior Research Project — 2026</span>
+  <ul class="nav-links">
+    <li><a href="#motivation">Motivation</a></li>
+    <li><a href="#dataset">Dataset</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#findings">Findings</a></li>
+  </ul>
+  <span class="nav-badge">Presented at CYBER-CARE Symposium · Spring 2026</span>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="home">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-noise"></div>
+  <p class="hero-eyebrow">University of Tennessee at Martin · Embry-Riddle Aeronautical University · CYBER-CARE Symposium</p>
+  <h1 class="hero-title">
+    Machine Learning–Based <em>Anomaly Detection</em> for IoT Transportation Networks
+  </h1>
+  <p class="hero-subtitle">
+    A comparative study of five ML algorithms against 1.2M+ network flow records, 11 attack types, and a V2V communication threat model — with XGBoost achieving 99.99% AUC-ROC and Decision Tree outperforming deep learning in multi-class classification.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Researchers</span>
+      <span class="hero-meta-value">Connor Gladish &amp; Molly Corgan</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Dataset</span>
+      <span class="hero-meta-value">ACI-IoT-2023</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Models Evaluated</span>
+      <span class="hero-meta-value">5 Algorithms</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Top Accuracy</span>
+      <span class="hero-meta-value">&gt;99.5%</span>
+    </div>
+  </div>
+  <span class="hero-scroll">Scroll to explore</span>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-number">1.2M+</div>
+    <div class="stat-label">Network Flow Samples</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">11</div>
+    <div class="stat-label">Distinct Attack Types</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">5</div>
+    <div class="stat-label">ML Algorithms Compared</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">0.9999</div>
+    <div class="stat-label">Best AUC-ROC (XGBoost)</div>
+  </div>
+</div>
+
+<!-- MOTIVATION -->
+<section id="motivation">
+  <div class="section-inner">
+    <p class="section-label">Research Motivation</p>
+    <h2 class="section-title">Why connected vehicles<br>are under <em>attack</em></h2>
+    <p class="section-body">
+      As autonomous vehicles, V2V communication, and smart infrastructure become critical to modern transportation, protecting these systems from cyber threats is no longer optional. A compromised network channel can cause an AI to misclassify a pedestrian as drivable road surface — with lethal consequences.
+    </p>
+
+    <div class="pullquote">
+      <p>"An adversarial payload injected through a compromised V2X channel can cause a vehicle's AI to see a pedestrian as drivable road — and accelerate toward them."</p>
+      <cite>— Core research motivation for real-time intrusion detection</cite>
+    </div>
+
+    <div class="threat-grid">
+      <div class="threat-card">
+        <div class="threat-icon">⬡</div>
+        <div class="threat-title">V2V Communication Hijacking</div>
+        <div class="threat-desc">Vehicle-to-vehicle channels are vulnerable to man-in-the-middle attacks that can silently modify the data exchanged between vehicles in real time, corrupting navigation decisions.</div>
+        <span class="threat-tag">High Severity</span>
+      </div>
+      <div class="threat-card">
+        <div class="threat-icon">⬡</div>
+        <div class="threat-title">DDoS on Smart Infrastructure</div>
+        <div class="threat-desc">Flooding attacks against traffic management systems can cause widespread traffic disruption, block emergency vehicle routing, and degrade signal control across entire regions.</div>
+        <span class="threat-tag">Infrastructure</span>
+      </div>
+      <div class="threat-card">
+        <div class="threat-icon">⬡</div>
+        <div class="threat-title">Adversarial Perception Attacks</div>
+        <div class="threat-desc">Adversarial noise injected through compromised channels corrupts the camera feed processed by a vehicle's semantic segmentation model, causing catastrophic misclassification of road hazards.</div>
+        <span class="threat-tag">Safety-Critical</span>
+      </div>
+      <div class="threat-card">
+        <div class="threat-icon">⬡</div>
+        <div class="threat-title">Fleet Ransomware &amp; Exfiltration</div>
+        <div class="threat-desc">Fleet management systems hold sensitive telemetry, route data, and vehicle identifiers. Ransomware locks out operators while data exfiltration enables targeted follow-on attacks.</div>
+        <span class="threat-tag">Data Risk</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- DATASET -->
+<section id="dataset">
+  <div class="section-inner">
+    <p class="section-label" style="color: rgba(200,53,43,0.8);">The Data</p>
+    <h2 class="section-title">ACI-IoT-2023 Dataset</h2>
+    <p class="section-body">The Army Cyber Institute's 2023 IoT network traffic dataset provides 1.23 million labelled network flows across 11 attack categories, making it one of the most comprehensive IoT intrusion detection benchmarks available.</p>
+
+    <div class="dataset-layout">
+      <div class="dataset-info">
+        <h3>Dataset Statistics</h3>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Total samples</span>
+          <span class="dataset-fact-value">1,231,406</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Features per flow</span>
+          <span class="dataset-fact-value">78</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Attack categories</span>
+          <span class="dataset-fact-value">11 classes</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Source</span>
+          <span class="dataset-fact-value">Army Cyber Institute</span>
+        </div>
+
+        <h3>Preprocessing Applied</h3>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Rare class threshold</span>
+          <span class="dataset-fact-value">&lt;100 samples removed</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Training sample size</span>
+          <span class="dataset-fact-value">500,000 (stratified)</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Split ratio</span>
+          <span class="dataset-fact-value">70 / 15 / 15</span>
+        </div>
+        <div class="dataset-fact">
+          <span class="dataset-fact-label">Scaling method</span>
+          <span class="dataset-fact-value">StandardScaler (train only)</span>
+        </div>
+      </div>
+
+      <div class="class-chart-wrap">
+        <h3 style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(240,236,228,0.4); margin-bottom: 1.5rem;">Class Distribution</h3>
+        <div class="class-bar-list" id="classBarList">
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Port Scan</span><span class="class-bar-pct">35.8%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="100"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Benign</span><span class="class-bar-pct">26.7%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill benign" data-w="74.6"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">ICMP Flood</span><span class="class-bar-pct">18.3%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="51.1"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Ping Sweep</span><span class="class-bar-pct">5.8%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="16.2"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">DNS Flood</span><span class="class-bar-pct">3.8%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="10.6"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Vulnerability Scan</span><span class="class-bar-pct">3.2%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="8.9"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">OS Scan</span><span class="class-bar-pct">3.0%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="8.4"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Slowloris</span><span class="class-bar-pct">1.5%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="4.2"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">SYN Flood</span><span class="class-bar-pct">1.1%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill" data-w="3.1"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">Dictionary Attack</span><span class="class-bar-pct">0.5%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill rare" data-w="1.4"></div></div>
+          </div>
+          <div class="class-bar-item">
+            <div class="class-bar-header"><span class="class-bar-name">UDP Flood</span><span class="class-bar-pct">0.06%</span></div>
+            <div class="class-bar-track"><div class="class-bar-fill rare" data-w="0.17"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" style="border-color: rgba(240,236,228,0.06);">
+
+<!-- PIPELINE -->
+<section id="pipeline">
+  <div class="section-inner">
+    <p class="section-label">Methodology</p>
+    <h2 class="section-title">The Training <em>Pipeline</em></h2>
+    <p class="section-body">Every experiment follows a nine-step pipeline designed to prevent data leakage, ensure fair class representation, and enable controlled comparison across all five algorithms. Each step is documented with the exact code used in training.</p>
+
+    <div class="pipeline-steps" id="pipelineSteps">
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">01</span></div>
+        <div class="step-content">
+          <span class="step-tag">Data Ingestion</span>
+          <h3 class="step-title">Raw Data Loading &amp; Rare Class Removal</h3>
+          <p class="step-desc">The 88.8 GB CSV file with 1,231,411 records and 78 features is loaded. Attack classes with fewer than 100 samples (specifically ARP Spoofing) are removed to ensure reliable stratified partitioning. The filtered dataset retains 11 attack classes plus Benign.</p>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">02</span></div>
+        <div class="step-content">
+          <span class="step-tag">Label Engineering</span>
+          <h3 class="step-title">Dual Target Construction</h3>
+          <p class="step-desc">Two parallel label arrays are constructed — a multi-class integer-encoded array (0–10) and a binary array (0 = benign, 1 = attack). Non-predictive identifier columns like IP addresses, timestamps, and flow IDs are dropped at this stage.</p>
+          <div class="step-code">
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> LabelEncoder<br>
+le = LabelEncoder()<br>
+y_encoded = le.fit_transform(df[<span class="str">'label'</span>])<br>
+y_binary = (df[<span class="str">'label'</span>] != <span class="str">'benign'</span>).astype(<span class="num">int</span>)
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">03</span></div>
+        <div class="step-content">
+          <span class="step-tag">Preprocessing</span>
+          <h3 class="step-title">Categorical Encoding &amp; Data Cleaning</h3>
+          <p class="step-desc">All categorical columns are integer-encoded independently. NaN values are imputed with column-wise mean. Infinite values — which arise when flow denominators approach zero — are replaced with NaN then filled with zero. Final feature dimensionality: ~47–50 features.</p>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">04</span></div>
+        <div class="step-content">
+          <span class="step-tag">Sampling</span>
+          <h3 class="step-title">Stratified Downsampling to 500K</h3>
+          <p class="step-desc">Training KNN and Random Forest on 1M+ records is computationally prohibitive. A stratified sample of exactly 500,000 records is drawn with <code>random_state=42</code>, preserving each class's proportional representation. UDP Flood's 791 total records produce only ~321 sampled records — the root cause of its universally poor recall.</p>
+          <div class="step-code">
+X_s, _, y_e_s, _, y_b_s, _ = train_test_split(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;X, y_encoded, y_binary,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;train_size=<span class="num">500000</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stratify=y_encoded,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;random_state=<span class="num">42</span><br>
+)
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">05</span></div>
+        <div class="step-content">
+          <span class="step-tag">Splitting</span>
+          <h3 class="step-title">Train / Validation / Test Split (70/15/15)</h3>
+          <p class="step-desc">Two sequential stratified splits produce ~350K training, ~75K validation, and ~75K test records. The test set is fully isolated before any model fitting and accessed exactly once — at final evaluation — to prevent any form of data leakage.</p>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">06</span></div>
+        <div class="step-content">
+          <span class="step-tag">Feature Scaling</span>
+          <h3 class="step-title">StandardScaler — Train Set Only</h3>
+          <p class="step-desc">All features are standardized to zero mean and unit variance. Critically, the scaler is fit exclusively on the training set and applied without refitting to validation and test sets, preventing data leakage. Although tree models are scale-invariant, XGBoost gradient updates, KNN distance computations, and CNN gradient flow all depend on feature magnitude — uniform scaling ensures performance differences reflect algorithms, not scale artifacts.</p>
+          <div class="step-code">
+scaler = StandardScaler()<br>
+X_train_scaled = scaler.fit_transform(X_train) <span class="cm"># fit only on train</span><br>
+X_val_scaled   = scaler.transform(X_val)       <span class="cm"># no refit</span><br>
+X_test_scaled  = scaler.transform(X_test)      <span class="cm"># no refit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">07</span></div>
+        <div class="step-content">
+          <span class="step-tag">Training</span>
+          <h3 class="step-title">Binary Classification — All 5 Models</h3>
+          <p class="step-desc">All five classifiers are trained on the binary-labeled training set. Wall-clock training time is recorded. ROC curve data and predicted class probabilities are computed on the held-out test set for all five models.</p>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">08</span></div>
+        <div class="step-content">
+          <span class="step-tag">Training</span>
+          <h3 class="step-title">Multi-Class Classification — 11 Attack Types</h3>
+          <p class="step-desc">The same five classifiers are retrained on the multi-class labels with two modifications: XGBoost switches to <code>multi:softmax</code> with <code>num_class=11</code>, and the CNN output layer changes from a single sigmoid to an 11-unit softmax. All other hyperparameters remain identical for controlled comparison.</p>
+          <div class="step-code">
+xgb_multi = xgb.XGBClassifier(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n_estimators=<span class="num">100</span>, max_depth=<span class="num">10</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;objective=<span class="str">'multi:softmax'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_class=<span class="num">11</span>, eval_metric=<span class="str">'mlogloss'</span><br>
+)
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number-wrap"><span class="step-number">09</span></div>
+        <div class="step-content">
+          <span class="step-tag">Evaluation</span>
+          <h3 class="step-title">Comprehensive Metrics &amp; Serialization</h3>
+          <p class="step-desc">For each model and task, the following are computed on the held-out test set: accuracy, weighted precision/recall/F1, AUC-ROC (binary), confusion matrix, per-class classification report, and wall-clock training time. All results are serialized to <code>aci_comprehensive_results_with_knn.json</code>.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- MODELS -->
+<section id="models">
+  <div class="section-inner">
+    <p class="section-label">Algorithms</p>
+    <h2 class="section-title">Five Models, <em>One Winner</em></h2>
+    <p class="section-body">From a simple Decision Tree to a 1D Convolutional Neural Network, each algorithm brings different inductive biases to bear on the problem of network intrusion detection. The results reveal which assumptions best match this data.</p>
+
+    <div class="model-grid">
+      <div class="model-card">
+        <div class="model-name">Decision Tree</div>
+        <div class="model-type">Single Learner · Axis-aligned splits</div>
+        <p class="model-desc">Deterministic depth-20 tree. Creates explicit, inspectable rules. Fastest to train among models with a training phase. Surprisingly outperforms ensembles in multi-class classification.</p>
+        <div class="model-metrics">
+          <div class="model-metric">
+            <div class="model-metric-val">99.77%</div>
+            <div class="model-metric-label">Binary Acc.</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">99.56%</div>
+            <div class="model-metric-label">Multi-Class</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-name">Random Forest</div>
+        <div class="model-type">Ensemble · Bagging · 100 trees</div>
+        <p class="model-desc">Bootstrap aggregation across 100 independent trees. Superior AUC calibration over the single tree but slightly more false positives due to ensemble voting on borderline flows.</p>
+        <div class="model-metrics">
+          <div class="model-metric">
+            <div class="model-metric-val">99.72%</div>
+            <div class="model-metric-label">Binary Acc.</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">99.43%</div>
+            <div class="model-metric-label">Multi-Class</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="model-card featured">
+        <span class="model-badge">★ Production Pick</span>
+        <div class="model-name">XGBoost</div>
+        <div class="model-type">Ensemble · Gradient Boosting</div>
+        <p class="model-desc">Sequential boosting with depth-10 trees, learning rate 0.1. Trains in just 0.08 minutes for binary classification. Best overall balance of accuracy, AUC, and inference speed for real-time edge deployment.</p>
+        <div class="model-metrics">
+          <div class="model-metric">
+            <div class="model-metric-val">99.74%</div>
+            <div class="model-metric-label">Binary Acc.</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">0.9999</div>
+            <div class="model-metric-label">AUC-ROC</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-name">KNN</div>
+        <div class="model-type">Instance-Based · Lazy Learner · k=5</div>
+        <p class="model-desc">No training phase — classifies by majority vote of 5 nearest Euclidean neighbors. Structurally disadvantaged by uniform feature weighting and Port Scan's overwhelming density in feature space.</p>
+        <div class="model-metrics">
+          <div class="model-metric">
+            <div class="model-metric-val">99.57%</div>
+            <div class="model-metric-label">Binary Acc.</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">99.24%</div>
+            <div class="model-metric-label">Multi-Class</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="model-card" style="grid-column: span 2;">
+        <div class="model-name">1D Convolutional Neural Network</div>
+        <div class="model-type">Deep Learning · 3× Conv1D blocks · 67K parameters</div>
+        <p class="model-desc">Treats 78 flow features as a 1D sequence with kernel_size=3. Three convolutional blocks (64→128→64 filters) with BatchNorm, ReLU, and MaxPooling, followed by GlobalAveragePooling and two Dense layers with Dropout(0.3). Binary runs 13 epochs; multi-class 9 epochs before early stopping. Despite GPU acceleration, trails all classical models — the convolutional inductive bias for spatially local correlations does not apply to independently-computed tabular flow statistics.</p>
+        <div class="model-metrics">
+          <div class="model-metric">
+            <div class="model-metric-val">99.24%</div>
+            <div class="model-metric-label">Binary Acc.</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">98.34%</div>
+            <div class="model-metric-label">Multi-Class</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">67,265</div>
+            <div class="model-metric-label">Parameters</div>
+          </div>
+          <div class="model-metric">
+            <div class="model-metric-val">1.25 min</div>
+            <div class="model-metric-label">Train Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="section-inner">
+    <p class="section-label" style="color: rgba(200,53,43,0.8);">Performance</p>
+    <h2 class="section-title">The Numbers</h2>
+    <p class="section-body">All five models were evaluated on a fully held-out test set of ~75K records. Results span binary and multi-class tasks across accuracy, precision, recall, F1-score, AUC-ROC, and wall-clock training time.</p>
+
+    <div class="results-tabs">
+      <button class="result-tab active" onclick="switchTab('binary')">Binary Classification</button>
+      <button class="result-tab" onclick="switchTab('multiclass')">Multi-Class (11 attacks)</button>
+      <button class="result-tab" onclick="switchTab('perclass')">Per-Class Breakdown</button>
+    </div>
+
+    <div class="result-panel active" id="panel-binary">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>AUC-ROC</th>
+            <th>Train Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model-col">Decision Tree</td>
+            <td>
+              <div class="bar-inline">
+                <span>99.77%</span>
+                <div class="bar-track-inline"><div class="bar-fill-inline" data-w="99.77"></div></div>
+              </div>
+            </td>
+            <td class="winner">99.87%</td>
+            <td>99.83%</td>
+            <td class="winner">99.85%</td>
+            <td>0.9968</td>
+            <td>0.17 min</td>
+          </tr>
+          <tr>
+            <td class="model-col">Random Forest</td>
+            <td>
+              <div class="bar-inline">
+                <span>99.72%</span>
+                <div class="bar-track-inline"><div class="bar-fill-inline" data-w="99.72"></div></div>
+              </div>
+            </td>
+            <td>99.79%</td>
+            <td>99.83%</td>
+            <td>99.81%</td>
+            <td class="winner">0.9999</td>
+            <td>0.31 min</td>
+          </tr>
+          <tr class="winner-row">
+            <td class="model-col">XGBoost ★</td>
+            <td>
+              <div class="bar-inline">
+                <span>99.74%</span>
+                <div class="bar-track-inline"><div class="bar-fill-inline" data-w="99.74"></div></div>
+              </div>
+            </td>
+            <td>99.82%</td>
+            <td>99.83%</td>
+            <td>99.82%</td>
+            <td class="winner">0.9999</td>
+            <td class="winner">0.08 min</td>
+          </tr>
+          <tr>
+            <td class="model-col">KNN</td>
+            <td>
+              <div class="bar-inline">
+                <span>99.57%</span>
+                <div class="bar-track-inline"><div class="bar-fill-inline" data-w="99.57"></div></div>
+              </div>
+            </td>
+            <td>99.70%</td>
+            <td>99.71%</td>
+            <td>99.70%</td>
+            <td>0.9980</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="model-col">1D CNN</td>
+            <td>
+              <div class="bar-inline">
+                <span>99.24%</span>
+                <div class="bar-track-inline"><div class="bar-fill-inline" data-w="99.24"></div></div>
+              </div>
+            </td>
+            <td>99.43%</td>
+            <td>99.53%</td>
+            <td>99.48%</td>
+            <td>0.9990</td>
+            <td>1.25 min</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="result-panel" id="panel-multiclass">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Train Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="winner-row">
+            <td class="model-col">Decision Tree ★</td>
+            <td class="winner">99.56%</td>
+            <td class="winner">99.54%</td>
+            <td class="winner">99.56%</td>
+            <td class="winner">99.55%</td>
+            <td class="winner">0.12 min</td>
+          </tr>
+          <tr>
+            <td class="model-col">XGBoost</td>
+            <td>99.52%</td>
+            <td>99.52%</td>
+            <td>99.52%</td>
+            <td>99.51%</td>
+            <td>0.54 min</td>
+          </tr>
+          <tr>
+            <td class="model-col">Random Forest</td>
+            <td>99.43%</td>
+            <td>99.42%</td>
+            <td>99.43%</td>
+            <td>99.41%</td>
+            <td>0.31 min</td>
+          </tr>
+          <tr>
+            <td class="model-col">KNN</td>
+            <td>99.24%</td>
+            <td>99.24%</td>
+            <td>99.24%</td>
+            <td>99.23%</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="model-col">1D CNN</td>
+            <td>98.34%</td>
+            <td>98.40%</td>
+            <td>98.34%</td>
+            <td>98.33%</td>
+            <td>0.89 min</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="result-panel" id="panel-perclass">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Attack Type</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Test Samples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model-col">ICMP Flood</td>
+            <td class="winner">99.99%</td>
+            <td class="winner">99.99%</td>
+            <td class="winner">99.99%</td>
+            <td>13,718</td>
+          </tr>
+          <tr>
+            <td class="model-col">Ping Sweep</td>
+            <td>99.98%</td>
+            <td>100.00%</td>
+            <td>99.99%</td>
+            <td>4,381</td>
+          </tr>
+          <tr>
+            <td class="model-col">SYN Flood</td>
+            <td>100.00%</td>
+            <td>99.76%</td>
+            <td>99.88%</td>
+            <td>844</td>
+          </tr>
+          <tr>
+            <td class="model-col">OS Scan</td>
+            <td>99.83%</td>
+            <td>99.91%</td>
+            <td>99.87%</td>
+            <td>2,286</td>
+          </tr>
+          <tr>
+            <td class="model-col">Benign</td>
+            <td>99.55%</td>
+            <td>99.79%</td>
+            <td>99.67%</td>
+            <td>20,056</td>
+          </tr>
+          <tr>
+            <td class="model-col">DNS Flood</td>
+            <td>99.86%</td>
+            <td>99.37%</td>
+            <td>99.61%</td>
+            <td>2,859</td>
+          </tr>
+          <tr>
+            <td class="model-col">Port Scan</td>
+            <td>99.55%</td>
+            <td>99.54%</td>
+            <td>99.55%</td>
+            <td>26,877</td>
+          </tr>
+          <tr>
+            <td class="model-col">Dictionary Attack</td>
+            <td>98.73%</td>
+            <td>100.00%</td>
+            <td>99.36%</td>
+            <td>388</td>
+          </tr>
+          <tr>
+            <td class="model-col">Slowloris</td>
+            <td>99.74%</td>
+            <td>99.82%</td>
+            <td>99.78%</td>
+            <td>1,135</td>
+          </tr>
+          <tr>
+            <td class="model-col">Vulnerability Scan</td>
+            <td>96.03%</td>
+            <td>95.51%</td>
+            <td>95.77%</td>
+            <td>2,408</td>
+          </tr>
+          <tr style="background: rgba(200,53,43,0.08);">
+            <td class="model-col" style="color: var(--accent);">UDP Flood ⚠</td>
+            <td style="color: var(--accent);">60.87%</td>
+            <td style="color: var(--accent);">29.17%</td>
+            <td style="color: var(--accent);">39.44%</td>
+            <td style="color: var(--accent);">48</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.8rem; color: rgba(240,236,228,0.3); margin-top: 1rem; font-family: var(--mono); letter-spacing: 0.06em;">Best multi-class model: Decision Tree. UDP Flood failure is a data problem (only 48 test samples), not a model problem.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" style="border-color: rgba(240,236,228,0.06);">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <p class="section-label">Feature Analysis</p>
+    <h2 class="section-title">Three features decide <em>everything</em></h2>
+    <p class="section-body">Random Forest's Gini impurity-based feature importances reveal a striking concentration: the top three packet-header features account for nearly 80% of all classification decisions — making deep packet inspection unnecessary for real-time deployment.</p>
+
+    <div class="features-layout">
+      <div class="feature-bars" id="featureBars">
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">01</span> <span class="feature-name">RST Flag Count</span></div>
+            <span class="feature-pct-label">28.34%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="100"></div></div>
+          <span class="feature-cat">Protocol Flag</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">02</span> <span class="feature-name">Fwd Header Length</span></div>
+            <span class="feature-pct-label">27.62%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="97.5"></div></div>
+          <span class="feature-cat">Packet Structure</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">03</span> <span class="feature-name">Source Port</span></div>
+            <span class="feature-pct-label">23.69%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="83.6"></div></div>
+          <span class="feature-cat">Network Addressing</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">04</span> <span class="feature-name">Bwd Packet Length Max</span></div>
+            <span class="feature-pct-label">5.22%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="18.4"></div></div>
+          <span class="feature-cat">Packet Size</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">05</span> <span class="feature-name">Fwd Packet Length Max</span></div>
+            <span class="feature-pct-label">2.76%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="9.7"></div></div>
+          <span class="feature-cat">Packet Size</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">06</span> <span class="feature-name">Connection Type</span></div>
+            <span class="feature-pct-label">2.18%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="7.7"></div></div>
+          <span class="feature-cat">Network Type</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">07</span> <span class="feature-name">Fwd Seg Size Min</span></div>
+            <span class="feature-pct-label">1.97%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="6.9"></div></div>
+          <span class="feature-cat">Segmentation</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-header">
+            <div><span class="feature-rank">08</span> <span class="feature-name">Flow IAT Min</span></div>
+            <span class="feature-pct-label">1.74%</span>
+          </div>
+          <div class="feature-track"><div class="feature-fill" data-w="6.1"></div></div>
+          <span class="feature-cat">Timing</span>
+        </div>
+      </div>
+
+      <div class="feature-insights">
+        <div class="insight-card">
+          <span class="insight-number">79%</span>
+          <div class="insight-title">Top 3 Features Drive All Decisions</div>
+          <div class="insight-text">RST Flag Count (28.3%), Forward Header Length (27.6%), and Source Port (23.7%) collectively account for 79.65% of all classification decisions. Any two attack classes sharing similar values on these three features will be confused by every model.</div>
+        </div>
+        <div class="insight-card">
+          <span class="insight-number">RST</span>
+          <div class="insight-title">DDoS and Port Scans Leave a Flag</div>
+          <div class="insight-text">RST Flag Count is consistently elevated in DDoS attacks and port scans, which generate TCP resets when connections are rejected. Benign traffic produces RST flags only during normal teardown — a much lower and more consistent rate.</div>
+        </div>
+        <div class="insight-card">
+          <span class="insight-number">⚡</span>
+          <div class="insight-title">Edge Deployment Without DPI</div>
+          <div class="insight-text">Because the top features are all available in packet headers without decrypting payload content, lightweight real-time deployment is feasible on V2X infrastructure and resource-constrained IoT edge devices — no deep packet inspection required.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- CNN DEEP DIVE -->
+<section id="cnn">
+  <div class="section-inner">
+    <p class="section-label">Deep Learning Analysis</p>
+    <h2 class="section-title">Why the CNN <em>underperformed</em></h2>
+    <p class="section-body">The 1D CNN achieved strong absolute accuracy but trailed every classical model. Understanding why reveals a fundamental mismatch between convolutional inductive biases and the structure of tabular network flow data.</p>
+
+    <div class="cnn-layout">
+      <div>
+        <h3 style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1.5rem;">Architecture</h3>
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <span class="arch-layer-name">Input</span>
+            <span class="arch-layer-detail">78 flow features</span>
+            <span class="arch-layer-shape">(N, 78, 1)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Conv1D (64 filters)</span>
+            <span class="arch-layer-detail">kernel=3, same padding</span>
+            <span class="arch-layer-shape">(N, 78, 64)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">BatchNorm + ReLU</span>
+            <span class="arch-layer-detail"></span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">MaxPooling1D</span>
+            <span class="arch-layer-detail">pool_size=2</span>
+            <span class="arch-layer-shape">(N, 39, 64)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Conv1D (128 filters)</span>
+            <span class="arch-layer-detail">kernel=3, same padding</span>
+            <span class="arch-layer-shape">(N, 39, 128)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">BatchNorm + ReLU</span>
+            <span class="arch-layer-detail"></span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">MaxPooling1D</span>
+            <span class="arch-layer-detail">pool_size=2</span>
+            <span class="arch-layer-shape">(N, 19, 128)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Conv1D (64 filters)</span>
+            <span class="arch-layer-detail">kernel=3, same padding</span>
+            <span class="arch-layer-shape">(N, 19, 64)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">GlobalAveragePool</span>
+            <span class="arch-layer-detail">positional info lost</span>
+            <span class="arch-layer-shape">(N, 64)</span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Dense(128) + Drop(0.3)</span>
+            <span class="arch-layer-detail"></span>
+          </div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Dense(64) + Drop(0.3)</span>
+            <span class="arch-layer-detail"></span>
+          </div>
+          <div class="arch-layer" style="border-bottom: none;">
+            <span class="arch-layer-name" style="color: var(--accent);">Output</span>
+            <span class="arch-layer-detail" style="color: #546e7a;">sigmoid (binary) / softmax×11</span>
+            <span class="arch-layer-shape">67,265 / 67,915 params</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cnn-findings">
+        <h3 style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1.5rem;">Why It Falls Short</h3>
+
+        <div class="cnn-finding">
+          <div class="cnn-finding-head">
+            <div class="finding-dot bad"></div>
+            <div class="cnn-finding-title">Wrong Inductive Bias</div>
+          </div>
+          <p class="cnn-finding-text">Conv1D with kernel_size=3 assumes features at positions N, N+1, and N+2 are correlated — like adjacent pixels in an image. For ACI-IoT-2023, features are independently computed flow statistics placed in arbitrary CSV column order. The kernels learn correlations between meaningless neighbor groupings.</p>
+        </div>
+
+        <div class="cnn-finding">
+          <div class="cnn-finding-head">
+            <div class="finding-dot bad"></div>
+            <div class="cnn-finding-title">GlobalAveragePooling Dilutes RST Signal</div>
+          </div>
+          <p class="cnn-finding-text">After convolution, GlobalAveragePooling averages all 19 remaining positions into a single 64-dimensional vector — burying RST Flag Count (the single most predictive feature at 28.3% importance) together with 63 other activations. Tree models split on RST alone and first.</p>
+        </div>
+
+        <div class="cnn-finding">
+          <div class="cnn-finding-head">
+            <div class="finding-dot warn"></div>
+            <div class="cnn-finding-title">315 False Positives: The Threshold Problem</div>
+          </div>
+          <p class="cnn-finding-text">Benign flows with legitimately elevated RST counts (TCP teardowns) produce sigmoid scores clustered around 0.52 — just above the hard 0.5 threshold. Tree models confidently route these to a benign leaf; the CNN's averaged activations leave them stranded at the decision boundary.</p>
+        </div>
+
+        <div class="cnn-finding">
+          <div class="cnn-finding-head">
+            <div class="finding-dot good"></div>
+            <div class="cnn-finding-title">Strong AUC Despite Lower Accuracy</div>
+          </div>
+          <p class="cnn-finding-text">The CNN's AUC of 0.9990 ranks third overall — better than KNN (0.9980) and Decision Tree (0.9968). Well-calibrated probability outputs mean the CNN remains useful in deployments where threshold tuning matters more than hard accuracy at 0.5.</p>
+        </div>
+
+        <div class="cnn-finding" style="border-bottom: none;">
+          <div class="cnn-finding-head">
+            <div class="finding-dot good"></div>
+            <div class="cnn-finding-title">No Overfitting — Architecture Ceiling</div>
+          </div>
+          <p class="cnn-finding-text">Both binary (epoch 13) and multi-class (epoch 9) runs show tight train/validation loss gaps throughout training. Early stopping triggered not from overfitting but because the architecture hit its performance ceiling — no additional epochs would help.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ERROR ANALYSIS -->
+<section id="errors">
+  <div class="section-inner">
+    <p class="section-label" style="color: rgba(200,53,43,0.8);">Error Analysis</p>
+    <h2 class="section-title">Why each model<br><em>made mistakes</em></h2>
+    <p class="section-body">A root-cause breakdown of model errors across both tasks, grounded in the pipeline code and dataset characteristics. Before blaming any algorithm, several upstream decisions in the pipeline create error conditions every model inherits.</p>
+
+    <div class="error-grid">
+      <div class="error-card">
+        <div class="error-model">Decision Tree <span class="error-model-tag tree">Tree</span></div>
+        <div class="error-cause">
+          <div class="error-cause-type">Binary — False Positives</div>
+          <div class="error-cause-text">Legitimate TCP connections send RST flags during teardown. A benign session with elevated RST count passes the tree's top split threshold and lands in the attack subtree with no recovery path.</div>
+        </div>
+        <div class="error-cause">
+          <div class="error-cause-type">Multi-Class — Port Scan / Vuln Scan Confusion</div>
+          <div class="error-cause-text">Both attack types show elevated RST counts and varied source ports. Flows at the exact Fwd Header Length boundary get assigned to whichever leaf saw more training examples — producing off-diagonal confusion matrix cells.</div>
+        </div>
+      </div>
+
+      <div class="error-card">
+        <div class="error-model">Random Forest <span class="error-model-tag ensemble">Ensemble</span></div>
+        <div class="error-cause">
+          <div class="error-cause-type">Binary — More FP than Decision Tree</div>
+          <div class="error-cause-text">Ensemble voting on borderline benign flows creates slim majority verdicts (60–40). Flows that the single tree confidently routes as benign flip to attack when 40 of 100 bootstrap trees learned that RST range as an attack cluster.</div>
+        </div>
+        <div class="error-cause">
+          <div class="error-cause-type">Multi-Class — Bootstrap Destroys UDP Flood</div>
+          <div class="error-cause-text">~53 of 100 trees have zero UDP Flood training samples due to bootstrap sampling of only 321 available records. The majority vote has no UDP Flood signal and routes those flows to the nearest large class.</div>
+        </div>
+      </div>
+
+      <div class="error-card">
+        <div class="error-model">XGBoost <span class="error-model-tag boosting">Boosting</span></div>
+        <div class="error-cause">
+          <div class="error-cause-type">Binary — Aggressive Learning Rate</div>
+          <div class="error-cause-text">lr=0.1 causes later boosting rounds to overfit on hard borderline examples. Lower lr (0.01–0.05) with more estimators would smooth boundary cases without hurting overall accuracy.</div>
+        </div>
+        <div class="error-cause">
+          <div class="error-cause-type">Multi-Class — Softmax Calibration Loss</div>
+          <div class="error-cause-text">multi:softmax outputs hard integer labels with no probability calibration. Using multi:softprob would enable threshold tuning for minority classes and likely improve Port Scan / Vulnerability Scan boundary decisions.</div>
+        </div>
+      </div>
+
+      <div class="error-card">
+        <div class="error-model">KNN <span class="error-model-tag instance">Instance</span></div>
+        <div class="error-cause">
+          <div class="error-cause-type">Binary — Uniform Feature Weighting</div>
+          <div class="error-cause-text">All 47 features contribute equally to Euclidean distance. RST Flag Count (28.3% importance) carries the same distance weight as Dst IP (1.6%). A flow can appear "close" to the wrong class purely from matching irrelevant features.</div>
+        </div>
+        <div class="error-cause">
+          <div class="error-cause-type">Multi-Class — Density Dominance</div>
+          <div class="error-cause-text">Port Scan's ~178K training records dominate neighborhoods. Borderline flows are statistically likely to have Port Scan neighbors regardless of their true class, producing systematic Port Scan misclassification at the boundaries.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="udp-callout">
+      <div class="udp-callout-icon">!!</div>
+      <div>
+        <div class="udp-callout-title">UDP Flood: A Universal Failure — and It's a Data Problem</div>
+        <p class="udp-callout-text">UDP Flood recall hovers at 20–30% across all five models. The cause is identical for each: only 791 total samples in the raw dataset produce only 48 test samples after stratified splitting. No algorithm can learn a reliable decision boundary from this. The fix is in the data pipeline — applying SMOTE oversampling to generate ~5,000 synthetic UDP Flood samples before splitting would give all models a learnable signal. This is a data problem, not a model problem.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" style="border-color: rgba(240,236,228,0.06);">
+
+<!-- FINDINGS -->
+<section id="findings">
+  <div class="section-inner">
+    <p class="section-label">Key Findings</p>
+    <h2 class="section-title">What this research <em>proves</em></h2>
+    <p class="section-body">Six takeaways from this study with direct implications for how machine learning should be deployed in IoT transportation security contexts.</p>
+
+    <div class="findings-list" id="findingsList">
+      <div class="finding-item">
+        <div class="finding-num">01</div>
+        <div class="finding-content">
+          <div class="finding-title">Classical ML Outperforms Deep Learning for Tabular NIDS</div>
+          <p class="finding-text">The CNN (98.34% multi-class F1) underperformed every classical model (99.23–99.55%). For structured tabular network flow data with strong feature-level signals, tree-based methods are more appropriate than convolutional architectures. The CNN's inductive bias for local spatial correlations has no valid analog in hand-engineered flow statistics.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-num">02</div>
+        <div class="finding-content">
+          <div class="finding-title">XGBoost is Optimal for Production Deployment</div>
+          <p class="finding-text">Best AUC-ROC (0.9999), fastest classical training (0.08 min binary), and near-optimal F1 (99.82% binary, 99.51% multi-class). The ensemble method's resistance to overfitting combined with well-calibrated probability outputs makes it ideal for deployments requiring adaptive threshold tuning based on operational safety requirements.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-num">03</div>
+        <div class="finding-content">
+          <div class="finding-title">Decision Tree Excels at Multi-Class Classification</div>
+          <p class="finding-text">The simplest model outperformed every ensemble and the CNN in multi-class classification (99.56% vs. 98.34% CNN, 99.52% XGBoost). Multi-class problems with distinct attack signatures benefit from crisp decision boundaries rather than ensemble averaging or convolutional feature extraction, which blur class-specific thresholds.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-num">04</div>
+        <div class="finding-content">
+          <div class="finding-title">Class Imbalance Remains the Critical Unsolved Challenge</div>
+          <p class="finding-text">UDP Flood recall of 29% across all models despite strong overall accuracy reveals that class imbalance cannot be solved by algorithm selection alone. SMOTE oversampling for rare attack classes should be integrated into the pipeline before any future experiments — improving minority class detection without degrading majority class performance.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-num">05</div>
+        <div class="finding-content">
+          <div class="finding-title">Packet Headers Are Sufficient — No Deep Packet Inspection Needed</div>
+          <p class="finding-text">79.65% of classification decisions rely on just three features: RST Flag Count, Forward Header Length, and Source Port — all available from packet headers without decrypting payload content. This enables real-time deployment on resource-constrained V2X infrastructure, embedded vehicle systems, and IoT edge devices.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-num">06</div>
+        <div class="finding-content">
+          <div class="finding-title">Training Efficiency Supports Continuous Learning at the Edge</div>
+          <p class="finding-text">XGBoost (0.08 min binary) and Decision Tree (0.12 min multi-class) train fast enough to support periodic retraining as attack patterns evolve — directly on the edge device, without requiring cloud offload. This is critical for V2V environments where network connectivity may be intermittent and latency requirements are strict.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- FIGURES -->
+<section id="figures">
+  <div class="section-inner">
+    <p class="section-label">Visualizations</p>
+    <h2 class="section-title">Research <em>Figures</em></h2>
+    <p class="section-body">All visualizations produced by the study — click any figure to download it.</p>
+
+    <div class="figures-grid">
+      <div class="figure-card" onclick="downloadFig('1_binary_confusion_matricesNEW.png')">
+        <img src="1_binary_confusion_matricesNEW.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 1</div>
+          <div class="figure-caption-text">Binary classification confusion matrices — all 5 models</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('2_roc_curves_full.png')">
+        <img src="2_roc_curves_full.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 2</div>
+          <div class="figure-caption-text">Full ROC curves — binary classification</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('3_roc_curves_zoomed.png')">
+        <img src="3_roc_curves_zoomed.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 3</div>
+          <div class="figure-caption-text">ROC zoomed — critical low-FPR region</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('4_multiclass_confusion_matricesNEW.png')">
+        <img src="4_multiclass_confusion_matricesNEW.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 4</div>
+          <div class="figure-caption-text">Multi-class confusion matrices — 11 attack types</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('5_binary_model_comparison.png')">
+        <img src="5_binary_model_comparison.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 5</div>
+          <div class="figure-caption-text">Binary classification model comparison bar chart</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('6_multiclass_model_comparison.png')">
+        <img src="6_multiclass_model_comparison.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 6</div>
+          <div class="figure-caption-text">Multi-class model comparison bar chart</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('7_per_class_performance.png')">
+        <img src="7_per_class_performance.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 7</div>
+          <div class="figure-caption-text">Per-class performance — Decision Tree</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('8_feature_importance.png')">
+        <img src="8_feature_importance.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 8</div>
+          <div class="figure-caption-text">Feature importance — Random Forest</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('9_auc_comparison.png')">
+        <img src="9_auc_comparison.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 9</div>
+          <div class="figure-caption-text">AUC-ROC ranking — all models</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('10_cnn_training_curves.png')">
+        <img src="10_cnn_training_curves.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 10</div>
+          <div class="figure-caption-text">CNN training curves — loss and accuracy over epochs</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('11_model_radar_chart.png')">
+        <img src="11_model_radar_chart.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 11</div>
+          <div class="figure-caption-text">Radar chart — multi-metric model comparison</div>
+        </div>
+      </div>
+
+      <div class="figure-card" onclick="downloadFig('CNNArch.png')">
+        <img src="CNNArch.png" style="width:100%; display:block;">
+        <div class="figure-caption">
+          <div class="figure-label">Fig. 12</div>
+          <div class="figure-caption-text">1D CNN architecture diagram</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="figureModal" onclick="closeModal(event)">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModalDirect()">✕ Close</button>
+    <div class="modal-placeholder-large">
+      <div class="modal-placeholder-icon-lg">[fig]</div>
+      <div class="modal-placeholder-msg">Upload figure to render here</div>
+    </div>
+    <div class="modal-title" id="modalTitle"></div>
+    <p class="modal-desc" id="modalDesc"></p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-section-title">Research</div>
+    <p class="footer-text">Machine Learning-Based Anomaly Detection for Traffic in IoT-Enabled Transportation Networks. Presented at the CYBER-CARE Symposium, Embry-Riddle Aeronautical University.</p>
+  </div>
+  <div>
+    <div class="footer-section-title">Links</div>
+    <a class="footer-link" href="https://github.com/connorgladish/IoTResearch" target="_blank">GitHub Repository ↗</a>
+    <a class="footer-link" href="https://www.kaggle.com/datasets/emilynack/aci-iot-network-traffic-dataset-2023" target="_blank">ACI-IoT-2023 Dataset ↗</a>
+    <a class="footer-link" href="https://www.unb.ca/cic/datasets/iotdataset-2023.html" target="_blank">UNB Dataset Reference ↗</a>
+    <a class="footer-link" href="https://erau.edu" target="_blank">Embry-Riddle Aeronautical University ↗</a>
+    <a class="footer-link" href="https://www.utm.edu" target="_blank">University of Tennessee at Martin ↗</a>
+
+  </div>
+  <div>
+    <div class="footer-section-title">Researchers</div>
+    <a class="footer-link" href="https://www.linkedin.com/in/connorcjgladish/" target="_blank">Connor Gladish ↗</a>
+    <a class="footer-link" href="https://www.linkedin.com/in/molly-corgan-3b2544224/" target="_blank">Molly Corgan ↗</a>
+
+    <div style="margin-top: 1.5rem;">
+
+    <div class="footer-section-title">Faculty</div>
+    <a class="footer-link" href="https://www.utm.edu/directory/departments/CSI/staff" target="_blank">Dr. Jian Wang ↗</a>
+    <a class="footer-link" href="https://www.utm.edu/directory/departments/CSI/staff" target="_blank">Dr. Lily Pharris ↗</a>
+    <a class="footer-link" href="https://faculty.erau.edu/Yongxin.Liu" target="_blank">Dr. Yongxin Liu ↗</a>
+
+    <div style="margin-top: 1.5rem;">
+
+      <div class="footer-section-title">Stack</div>
+      <p class="footer-text">Python 3.8 · scikit-learn · XGBoost · TensorFlow/Keras · NumPy · Google Colab (GPU)</p>
+    </div>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span class="footer-copy">© 2026 Connor Gladish &amp; Molly Corgan · MIT License</span>
+  <span class="footer-conf">CYBER-CARE Symposium · University of Tennessee at Martin · Embry-Riddle Aeronautical University</span>
+</div>
+
+<script>
+  // Tab switching
+  function switchTab(id) {
+    document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.result-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    event.target.classList.add('active');
+    animateBars();
+  }
+
+  function downloadFig(filename) {
+  const a = document.createElement('a');
+  a.href = filename;
+  a.download = filename;
+  a.click();
+}
+
+  // Animate bars with IntersectionObserver
+  function animateBars() {
+    document.querySelectorAll('.class-bar-fill, .feature-fill, .bar-fill-inline').forEach(el => {
+      el.style.width = (el.dataset.w || 0) + '%';
+    });
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        if (e.target.id === 'classBarList' || e.target.id === 'featureBars') {
+          setTimeout(animateBars, 100);
+        }
+        if (e.target.classList.contains('pipeline-step') || e.target.classList.contains('finding-item')) {
+          e.target.classList.add('visible');
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.getElementById('classBarList') && io.observe(document.getElementById('classBarList'));
+  document.getElementById('featureBars') && io.observe(document.getElementById('featureBars'));
+  document.querySelectorAll('.pipeline-step, .finding-item').forEach(el => io.observe(el));
+
+  // Animate results table bars when results section visible
+  const resultsIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) animateBars(); });
+  }, { threshold: 0.2 });
+  const rSection = document.getElementById('results');
+  if (rSection) resultsIo.observe(rSection);
+
+  // Modal
+  function openModal(title, desc) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent = desc;
+    document.getElementById('figureModal').classList.add('open');
+  }
+  function closeModal(e) {
+    if (e.target === document.getElementById('figureModal')) closeModalDirect();
+  }
+  function closeModalDirect() {
+    document.getElementById('figureModal').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+  // Stagger pipeline steps visibility
+  document.querySelectorAll('.pipeline-step').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.08) + 's';
+  });
+  document.querySelectorAll('.finding-item').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+</script>
+</body>
+</html>
