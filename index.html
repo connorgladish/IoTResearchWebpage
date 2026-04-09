@@ -2452,13 +2452,13 @@ xgb_multi = xgb.XGBClassifier(<br>
     el.style.transitionDelay = (i * 0.1) + 's';
   });
 
-   fetch('https://api.countapi.xyz/hit/connorgladish.github.io/IoTResearch')
-    .then(r => r.json())
-    .then(data => {
-      const el = document.getElementById('visit-count');
-      if (el && data.value) el.textContent = data.value.toLocaleString();
-    })
-    .catch(() => {});
+   fetch('https://hits.sh/connorgladish.github.io/IoTResearch.json')
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById('visit-count');
+    if (el && data.count) el.textContent = Number(data.count).toLocaleString();
+  })
+  .catch(() => {});
 </script>
 </body>
 </html>
