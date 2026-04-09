@@ -192,7 +192,7 @@
     background: var(--accent);
     padding: 1.5rem 4rem;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 1px;
     overflow: hidden;
   }
@@ -1247,6 +1247,10 @@
   <div class="stat-item">
     <div class="stat-number">0.9999</div>
     <div class="stat-label">Best AUC-ROC (XGBoost)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" id="visit-count">—</div>
+    <div class="stat-label">Site Visitors</div>
   </div>
 </div>
 
@@ -2447,6 +2451,14 @@ xgb_multi = xgb.XGBClassifier(<br>
   document.querySelectorAll('.finding-item').forEach((el, i) => {
     el.style.transitionDelay = (i * 0.1) + 's';
   });
+
+   fetch('https://api.countapi.xyz/hit/connorgladish.github.io/IoTResearch')
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById('visit-count');
+      if (el && data.value) el.textContent = data.value.toLocaleString();
+    })
+    .catch(() => {});
 </script>
 </body>
 </html>
