@@ -6,8 +6,6 @@
 <title>ML Anomaly Detection — IoT Transportation Networks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script data-goatcounter="https://connorgladish.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
@@ -194,7 +192,7 @@
     background: var(--accent);
     padding: 1.5rem 4rem;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     overflow: hidden;
   }
@@ -1249,10 +1247,6 @@
   <div class="stat-item">
     <div class="stat-number">0.9999</div>
     <div class="stat-label">Best AUC-ROC (XGBoost)</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-number" id="visit-count">—</div>
-    <div class="stat-label">Site Visitors</div>
   </div>
 </div>
 
@@ -2453,14 +2447,6 @@ xgb_multi = xgb.XGBClassifier(<br>
   document.querySelectorAll('.finding-item').forEach((el, i) => {
     el.style.transitionDelay = (i * 0.1) + 's';
   });
-
-  fetch('https://connorgladish.goatcounter.com/counter/TOTAL.json')
-  .then(r => r.json())
-  .then(data => {
-    const el = document.getElementById('visit-count');
-    if (el && data.count) el.textContent = data.count;
-  })
-  .catch(() => {});
 </script>
 </body>
 </html>
