@@ -1162,20 +1162,103 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    .hero { padding: 5rem 2rem 3rem; }
-    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 1rem 2rem; }
-    .section-inner { padding: 4rem 2rem; }
-    .dataset-layout, .features-layout, .cnn-layout { grid-template-columns: 1fr; gap: 2rem; }
-    .model-grid { grid-template-columns: 1fr; }
-    .threat-grid { grid-template-columns: 1fr; }
-    .error-grid { grid-template-columns: 1fr; }
-    .figures-grid { grid-template-columns: 1fr 1fr; }
-    footer { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
-    .footer-bottom { flex-direction: column; gap: 0.5rem; padding: 1rem 2rem; }
     nav { padding: 0 1rem; }
     .nav-links { display: none; }
-    .finding-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .nav-brand { font-size: 10px; }
+    .nav-badge { font-size: 9px; padding: 3px 7px; }
+
+    .hero { padding: 5rem 1.5rem 3rem; }
+    .hero-title { font-size: clamp(2rem, 9vw, 3.2rem); }
+    .hero-subtitle { font-size: 0.95rem; }
+    .hero-meta { flex-wrap: wrap; gap: 1.5rem; }
+    .hero-divider { display: none; }
+    .hero-scroll { display: none; }
+
+    .stats-bar {
+      grid-template-columns: repeat(2, 1fr);
+      padding: 0.75rem 1rem;
+    }
+    .stat-item { padding: 0.75rem 1rem; }
+    .stat-number { font-size: 1.7rem; }
+    .stat-label { font-size: 9px; }
+    .stat-item:nth-child(2)::after { display: none; }
+
+    .section-inner { padding: 3rem 1.5rem; }
+    .section-title { font-size: clamp(1.6rem, 7vw, 2.4rem); }
+
+    .threat-grid { grid-template-columns: 1fr; }
+    .threat-card { padding: 1.5rem; }
+
+    .pullquote { padding: 1rem 1.25rem; }
+    .pullquote p { font-size: 1.1rem; }
+
+    .dataset-layout { grid-template-columns: 1fr; gap: 2rem; }
+
+    .pipeline-steps::before { display: none; }
+    .pipeline-step { flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .step-number-wrap { width: 40px; height: 40px; }
+    .step-number { font-size: 1rem; }
+    .step-content { padding-top: 0; }
+    .step-code { font-size: 11px; overflow-x: auto; }
+
+    .model-grid { grid-template-columns: 1fr; }
+    .model-card[style*="span 2"] { grid-column: span 1 !important; }
+
+    .results-tabs { overflow-x: auto; }
+    .result-tab { padding: 0.75rem 1rem; font-size: 10px; white-space: nowrap; }
+    .results-table { font-size: 0.8rem; }
+    .results-table th { font-size: 9px; padding: 0 0.5rem 0.75rem 0; }
+    .results-table td { padding: 0.75rem 0.5rem 0.75rem 0; }
+    .bar-track-inline { display: none; }
+
+    .features-layout { grid-template-columns: 1fr; gap: 2rem; }
+
+    .cnn-layout { grid-template-columns: 1fr; gap: 2rem; }
+
+    .error-grid { grid-template-columns: 1fr; }
+
+    .finding-item { grid-template-columns: 1fr; gap: 0.5rem; padding: 2rem 0; }
     .finding-num { font-size: 2rem; }
+
+    .figures-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    footer {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 2rem 1.5rem;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+
+    .udp-callout { grid-template-columns: 1fr; gap: 0.75rem; padding: 1.5rem; }
+    .udp-callout-icon { font-size: 2rem; }
+  }
+
+  @media (max-width: 480px) {
+    .hero { padding: 4.5rem 1.25rem 2.5rem; }
+    .hero-title { font-size: clamp(1.8rem, 9vw, 2.4rem); }
+    .hero-meta { gap: 1rem; }
+    .hero-meta-item { min-width: 40%; }
+
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 0.5rem; }
+    .stat-item { padding: 0.6rem 0.75rem; }
+    .stat-number { font-size: 1.5rem; }
+
+    .section-inner { padding: 2.5rem 1.25rem; }
+
+    .figures-grid { grid-template-columns: 1fr; }
+
+    .results-table th, .results-table td { font-size: 0.75rem; }
+
+    .arch-layer-shape { display: none; }
+    .arch-layer-detail { display: none; }
+    .arch-layer-name { min-width: unset; font-size: 11px; }
+
+    .model-metrics { flex-wrap: wrap; gap: 1rem; }
   }
 </style>
 </head>
